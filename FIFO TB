@@ -1,0 +1,90 @@
+ library	IEEE;
+ use	IEEE.STD_LOGIC_1164.ALL;
+ use	IEEE.NUMERIC_STD.ALL;
+ entity	fifo_tb	is
+ end	fifo_tb;
+ architecture	Behavioral	of	fifo_tb	is
+				--	Component	Declaration	for	the	Unit	Under	Test	(UUT)
+				component	fifo
+								generic	(
+												DEPTH	:	integer	:=	8
+								);
+								Port	(
+												clk								:	in		STD_LOGIC;
+												reset						:	in		STD_LOGIC;
+												enr								:	in		STD_LOGIC;
+												enw								:	in		STD_LOGIC;
+																	data_in				:	in		STD_LOGIC_VECTOR	(7	downto	0);
+												data_out			:	out	STD_LOGIC_VECTOR	(7	downto	0);
+												fifo_empty	:	out	STD_LOGIC;
+												fifo_full		:	out	STD_LOGIC
+								);
+				end	component;
+				--	Testbench	signals
+				signal	clk_tb								:	STD_LOGIC	:=	'0';
+				signal	reset_tb						:	STD_LOGIC	:=	'0';
+				signal	enr_tb								:	STD_LOGIC	:=	'0';
+				signal	enw_tb								:	STD_LOGIC	:=	'0';
+					signal	data_in_tb				:	STD_LOGIC_VECTOR	(7	downto	0)	:=	(others	=>	'0');
+				signal	data_out_tb			:	STD_LOGIC_VECTOR	(7	downto	0);
+				signal	fifo_empty_tb	:	STD_LOGIC;
+				signal	fifo_full_tb		:	STD_LOGIC;
+				--	Clock	period	definition
+				constant	CLK_PERIOD	:	time	:=	10	ns;
+ begin
+				--	Instantiate	the	Unit	Under	Test	(UUT)
+				uut:	fifo
+								port	map	(
+											clk								=>	clk_tb,
+												reset						=>	reset_tb,
+												enr								=>	enr_tb,
+												enw								=>	enw_tb,
+												data_in				=>	data_in_tb,
+												data_out			=>	data_out_tb,
+												fifo_empty	=>	fifo_empty_tb,
+												fifo_full		=>	fifo_full_tb
+								);
+				--	Clock	generation
+				clk_process	:	process
+				begin
+								clk_tb	<=	'0';
+								wait	for	CLK_PERIOD/2;
+										clk_tb	<=	'1';
+								wait	for	CLK_PERIOD/2;
+				end	process;
+				--	Stimulus	process
+				stim_proc:	process
+				begin
+								----------------------------------------------------------------
+								--	RESET
+								----------------------------------------------------------------
+								reset_tb	<=	'1';
+								wait	for	20	ns;
+								reset_tb	<=	'0';
+								wait	for	20	ns;
+											----------------------------------------------------------------
+								--	WRITE	some	data
+								----------------------------------------------------------------
+								for	i	in	0	to	4	loop
+												enw_tb	<=	'1';
+												data_in_tb	<=	std_logic_vector(to_unsigned(i	+	10,	8));		--	10,11,12,13,14
+												wait	for	CLK_PERIOD;
+								end	loop;
+								enw_tb	<=	'0';
+								wait	for	30	ns;
+										----------------------------------------------------------------
+								--	READ	back	the	data
+								----------------------------------------------------------------
+								for	i	in	0	to	4	loop
+												enr_tb	<=	'1';
+												wait	for	CLK_PERIOD;
+								end	loop;
+								enr_tb	<=	'0';
+								----------------------------------------------------------------
+								--	Finish	simulation
+								----------------------------------------------------------------
+										wait	for	50	ns;
+								assert	false	report	"Simulation	Finished	Successfully"	severity	note;
+								wait;
+				end	process;
+ end	Behavioral;
