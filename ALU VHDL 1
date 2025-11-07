@@ -1,0 +1,28 @@
+library	IEEE;
+ use	IEEE.STD_LOGIC_1164.ALL;
+ use	IEEE.NUMERIC_STD.ALL;
+ use	IEEE.STD_LOGIC_ARITH.ALL;
+ use	IEEE.STD_LOGIC_UNSIGNED.ALL;--	Uncomment	the	following	library	declaration	if	using--	arithmetic	functions	with	Signed	or	Unsigned	values--use	IEEE.NUMERIC_STD.ALL;--	Uncomment	the	following	library	declaration	if	instantiating--	any	Xilinx	primitives	in	this	code.--library	UNISIM;--use	UNISIM.VComponents.all;
+ entity	alc1	is
+				Port	(	a	:	in		STD_LOGIC_VECTOR	(3	downto	0);
+											b	:	in		STD_LOGIC_VECTOR	(3	downto	0);
+											c	:	in		STD_LOGIC_VECTOR	(2	downto	0);
+											y	:	out		STD_LOGIC_VECTOR	(3	downto	0));
+ end	alc1;
+ architecture	Behavioral	of	alc1	is
+ begin
+ process(a,b,c)
+ begin	
+				case	c	is
+					when	"000"=>Y<=a+b;
+					when	"001"=>Y<=a-b;
+					when	"010"=>Y<=a	and	b;
+					when	"011"=>Y<=a	nand	b;
+					when	"100"=>Y<=a	xor	b;
+					when	"101"=>Y<=a	xnor	b;
+					when	"110"=>Y<=a	or	b;
+					when	"111"=>Y<=a;
+					when	others=>Y<="0000";
+					end	case;
+					end	process;
+ end	Behavioral;
