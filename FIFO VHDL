@@ -1,0 +1,66 @@
+ library	IEEE;
+ use	IEEE.STD_LOGIC_1164.ALL;
+ use	IEEE.NUMERIC_STD.ALL;
+ entity	fifo	is
+				generic	(
+								DEPTH	:	integer	:=	8		--	FIFO	depth
+				);
+				Port	(
+								clk								:	in		STD_LOGIC;
+								reset						:	in		STD_LOGIC;
+								enr								:	in		STD_LOGIC;		--	read	enable
+								enw								:	in		STD_LOGIC;		--	write	enable
+										data_in				:	in		STD_LOGIC_VECTOR	(7	downto	0);
+								data_out			:	out	STD_LOGIC_VECTOR	(7	downto	0);
+								fifo_empty	:	out	STD_LOGIC;
+								fifo_full		:	out	STD_LOGIC
+				);
+ end	fifo;
+ architecture	Behavioral	of	fifo	is--	memory	declaration
+				type	memory_type	is	array	(0	to	DEPTH-1)	of	STD_LOGIC_VECTOR(7	downto	0);
+				signal	memory			:	memory_type	:=	(others	=>	(others	=>	'0'));
+				signal	readptr		:	integer	:=	0;
+				signal	writeptr	:	integer	:=	0;
+				signal	empty				:	STD_LOGIC	:=	'1';
+				signal	full					:	STD_LOGIC	:=	'0';
+				signal	num_elem	:	integer	:=	0;
+ begin
+	fifo_empty	<=	empty;
+				fifo_full		<=	full;
+				process(clk,	reset)
+				begin
+								if	(reset	=	'1')	then
+												memory			<=	(others	=>	(others	=>	'0'));
+												data_out	<=	(others	=>	'0');
+												empty				<=	'1';
+												full					<=	'0';
+												readptr		<=	0;
+												writeptr	<=	0;
+												num_elem	<=	0;
+																	elsif	rising_edge(clk)	then
+												--	READ
+												if	(enr	=	'1'	and	empty	=	'0')	then
+																data_out	<=	memory(readptr);
+																readptr		<=	(readptr	+	1)	mod	DEPTH;
+																num_elem	<=	num_elem	-	1;
+												end	if;
+												--	WRITE
+												if	(enw	=	'1'	and	full	=	'0')	then
+																memory(writeptr)	<=	data_in;
+																writeptr	<=	(writeptr	+	1)	mod	DEPTH;
+																num_elem	<=	num_elem	+	1;
+												end	if;
+																--	FLAGS
+												if	(num_elem	=	0)	then
+																empty	<=	'1';
+												else
+																empty	<=	'0';
+												end	if;
+												if	(num_elem	=	DEPTH)	then
+																full	<=	'1';
+												else
+																full	<=	'0';
+												end	if;
+								end	if;
+				end	process;
+ end	Behavioral;
